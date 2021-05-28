@@ -16,6 +16,4 @@ forecast = (lat, long, callback) => {
     })
 }
 
-module.exports = {
-    forecast
-}
+module.exports = forecast

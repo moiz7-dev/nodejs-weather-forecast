@@ -1,7 +1,7 @@
 const path = require('path')
 const express = require('express')
 const hbs = require('hbs')
-const geocode = require('./utils/geocode')
+const { geocode, reverseGeocode } = require('./utils/geocode')
 const forecast = require('./utils/forecast')
 
 const app = express()
@@ -39,14 +39,14 @@ app.get('/weather' , (req, res) => {
     }
 
     
-    geocode.geocode(address, (error, {location, lat, long} = {}) => {
+    geocode(address, (error, {location, lat, long} = {}) => {
         if(error){
             return res.send({
                 error
             })
         }
 
-        forecast.forecast(lat, long, (error, forecast) => {
+        forecast(lat, long, (error, forecast) => {
             if(error){
                 res.send({
                     error
@@ -56,11 +56,37 @@ app.get('/weather' , (req, res) => {
             res.send({
                 forecast,
                 location,
-                address: req.query.address
             })
         })
     })
 
+})
+
+app.get('/your-weather', (req, res) => {
+    const lat = req.query.lat
+    const long = req.query.long
+    
+    reverseGeocode(lat, long, (error, location) => {
+        if (error) {
+            return res.send({
+                error
+            })
+        }
+        
+
+        forecast(lat, long, (error, forecast) => {
+            if (error) {
+                res.send({
+                    error
+                })
+            }
+
+            res.send({
+                forecast,
+                location,
+            })
+        })
+    })
 })
 
 app.get('/help', (req, res) => {
